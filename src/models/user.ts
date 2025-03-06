@@ -1,6 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 import validator from "validator";
 import { Types } from 'mongoose';
+import UserTask from "./userTask";
+import Task from "./task";
 
 export interface IUser extends Document {
     _id: Types.ObjectId;
@@ -23,7 +25,8 @@ const UserSchema = new Schema<IUser>(
             type: String, 
             required: [true, "Email is required"], 
             unique: true, 
-            lowercase: true, 
+            lowercase: true,
+            index: true,
             validate: [validator.isEmail, "Invalid email format"] 
         },
         password: { 
@@ -51,6 +54,13 @@ UserSchema.set("toJSON", {
         delete ret.__v;
         return ret;
     },
+});
+
+UserSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const userId = this._id;
+    await UserTask.deleteMany({ userId });
+    await Task.deleteMany({ createdBy: userId })
+    next();
 });
 
 const User = mongoose.model<IUser>("User", UserSchema);

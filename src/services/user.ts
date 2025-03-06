@@ -70,7 +70,13 @@ export const deleteOne = async(req: any) => {
 
     await ensureAdminOrSameUser(req.user, userId, 'user');
 
-    await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new ApiError("User not found", 404);
+    }
+
+    await user.deleteOne();
 
     return;
 }

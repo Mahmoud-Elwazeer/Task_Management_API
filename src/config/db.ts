@@ -5,7 +5,7 @@ const MONGODB_URL =  process.env.MONGODB_URL|| 'mongodb://127.0.0.1:27017/task_m
 
 const dbConnection = () => {
     mongoose.connect(MONGODB_URL)
-    .then((conn) => console.log(`Connected to MongoDB: ${conn.connection.host}`))
+    .then((conn) => console.log('Connected to MongoDB successfully'))
 }
 
 export default dbConnection;

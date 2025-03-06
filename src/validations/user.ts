@@ -25,10 +25,21 @@ const createUserSchema = z.object({
 });
 
 const updateUserSchema = z.object({
+    userId: z.string().length(24, "Invalid Task ID format"),
     name: z.string().min(3, "Name must be at least 3 characters long").optional(),
     email: z.string().email("Invalid email format").optional(),
     role: z.enum(["Admin", "Manager", "User"]).optional()
 });
+
+const UserByIdSchema = z.object({
+    userId: z.string().length(24, "Invalid Task ID format"),
+});
+
+const getUsersSchema = z.object({
+    page: z.string().optional(),
+    limit: z.string().optional(),
+});
+
 
 const checkEmail = async(email: String) => {
     const existingUser = await User.findOne({ email });
@@ -48,11 +59,21 @@ export const createUserValidator = asyncHandler(async (req: any, res: Response, 
 });
 
 export const updateUserValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
-    const validatedData = updateUserSchema.parse(req.body);
+    const validatedData = updateUserSchema.parse({ userId: req.params.userId, ...req.body});
 
     if (validatedData.email)
         await checkEmail(validatedData.email);
 
     req.validatedData = validatedData
+    next();
+});
+
+export const UserByIdValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
+    UserByIdSchema.parse({ userId: req.params.userId });
+    next();
+});
+
+export const getUsersValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
+    getUsersSchema.parse(req.query);
     next();
 });
