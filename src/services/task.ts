@@ -1,9 +1,9 @@
 import ApiError from "../utils/apiError";
 import Task from "../models/task";
-import * as userServices from './user';
 import { Request } from "express";
 import UserTask from "../models/userTask"; 
-import { getCache, setCache, deleteCache, checkKey } from "../utils/redis";
+import TaskHistory from "../models/taskHistory";
+import { deleteCache, checkKey } from "../utils/redis";
 
 export const create = async(req: any) => {
     const validatedData = req.validatedData
@@ -16,6 +16,12 @@ export const create = async(req: any) => {
 
     await newTask.save();
 
+    await TaskHistory.create({
+        taskId: newTask._id,
+        userId: req.user._id,
+        action: "CREATED",
+    });
+
     return newTask;
 }
 
@@ -26,7 +32,7 @@ export const getOne = async(taskId: string) => {
     return task;
 }
 
-const pagination_filtering_tasks = (query: any) => {
+export const pagination_filtering_tasks = (query: any) => {
     let filters: any = {};
 
     const { status, priority, dueDate } =  query;
@@ -55,7 +61,7 @@ export const getAll = async(req: Request) => {
 export const update = async(req: any) => {
     const taskId = req.params.taskId;
 
-    const checkTask = await getOne(taskId);
+    await getOne(taskId);
 
     const task = await Task.findByIdAndUpdate(taskId, req.validatedData, {
         new: true, runValidators: true
@@ -66,11 +72,18 @@ export const update = async(req: any) => {
         await invalidateTasksCache(userTask.userId.toString());
     }
 
+    await TaskHistory.create({
+        taskId,
+        userId: req.user._id,
+        action: "UPDATED",
+        changes: req.validatedData,
+    });
+
     return task;
 }
 
 
-export const deleteOne = async(req: Request) => {
+export const deleteOne = async(req: any) => {
     const taskId = req.params.taskId;
 
     const task = await Task.findById(taskId);
@@ -86,78 +99,16 @@ export const deleteOne = async(req: Request) => {
         await invalidateTasksCache(userTask.userId.toString());
     }
 
-    return;
+    await TaskHistory.create({
+        taskId,
+        userId: req.user._id,
+        action: "DELETED",
+    });
+
+    return task;
 }
 
-
-export const assignUserToTask = async (taskId: string, userId: string) => {
-    // check available tasks
-    await getOne(taskId);
-    await userServices.getOne(userId);
-
-    const existingAssignment = await UserTask.findOne({ taskId, userId });
-
-    if (existingAssignment) {
-        throw new ApiError("User is already assigned to this task", 400);
-    }
-
-    await UserTask.create({ taskId, userId });
-
-    await invalidateTasksCache(userId)
-
-    return;
-};
-
-
-export const getTasksAssignedToUser = async (req: any) => {
-    let tasks;
-
-    const { userId } = req.params;
-    await userServices.getOne(userId);  // check user
-
-    const { status, priority, dueDate } =  req.query;
-
-    const query: any = { userId };
-
-    const { filters, skip, page, limit } = pagination_filtering_tasks(req.query);
-
-    const cacheKey = `tasks:${userId}:${status || "all"}:${priority || "all"}:${dueDate || "all"}:${page}:${limit}`;
-    tasks = await getCache(cacheKey);
-
-    if (tasks) {
-        return { tasks, source: "redis" };
-    }
-
-    const userTasks = await UserTask.find(query).populate({
-                        path: "taskId",
-                        match: filters,
-                        select: "title status priority dueDate",
-                    }).skip(skip).limit(limit)
-
-    tasks = userTasks.filter((userTask) => userTask.taskId !== null);
-
-    await setCache(cacheKey, tasks);
-
-    return { tasks , source: "database"}
-};
-
-export const getUsersAssignedToTask = async (taskId: string) => {
-    return await UserTask.find({ taskId }).populate("userId", "name email role");
-};
-
-export const removeUserFromTask = async (taskId: string, userId: string) => {
-    const existingAssignment = await UserTask.findOne({ taskId, userId });
-
-    if (!existingAssignment) {
-        throw new ApiError("User is not assigned to this task", 404);
-    }
-
-    await invalidateTasksCache(userId)
-
-    return await UserTask.deleteOne({ taskId, userId });
-};
-
-const invalidateTasksCache = async (userId: string) => {
+export const invalidateTasksCache = async (userId: string) => {
     try {
         const keys = await checkKey(`tasks:${userId}:*`)
         if (keys.length > 0){

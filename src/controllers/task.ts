@@ -1,10 +1,18 @@
 import * as taskServices from '../services/task'
 import { Request, Response, NextFunction} from 'express'
 import asyncHandler from 'express-async-handler'
-
+import notificationQueue from '../queues/notification';
 
 export const create = asyncHandler(async(req: Request, res: Response, next: NextFunction) => {
     const task = await taskServices.create(req);
+
+    // Add notification job
+    await notificationQueue.add("taskEvent", {
+        type: "TASK_CREATED",
+        taskId: task._id,
+        userId: task.createdBy,
+    });
+
     res.status(201).json({ message: 'Task added successfully', task });
 });
 
@@ -19,36 +27,30 @@ export const getAll = asyncHandler(async(req: Request, res: Response, next: Next
     res.status(200).json({ message: 'Tasks Retrieved successfully', totalTasks, pagination, tasks });
 });
 
-export const update = asyncHandler(async(req: Request, res: Response, next: NextFunction) => {
+export const update = asyncHandler(async(req: any, res: Response, next: NextFunction) => {
     const task = await taskServices.update(req);
+
+    if (task)
+        await notificationQueue.add("taskEvent", {
+            type: "TASK_UPDATED",
+            taskId: task._id,
+            deletedBy: req.user._id,
+            userId: task.createdBy,
+        });
+
     res.status(200).json({ message: 'Task updated successfully', task});
 });
 
-export const deleteOne = asyncHandler(async(req: Request, res: Response, next: NextFunction) => {
-    await taskServices.deleteOne(req);
+export const deleteOne = asyncHandler(async(req: any, res: Response, next: NextFunction) => {
+    const task = await taskServices.deleteOne(req);
+
+    await notificationQueue.add("taskEvent", {
+        type: "TASK_DELETED",
+        taskId: task._id,
+        updatedBy: req.user._id,
+        userId: task.createdBy,
+    });
+
+
     res.status(204).json({ message: 'Task deleted successfully' });
 });
-
-export const assignUserToTask = asyncHandler(async (req: Request, res: Response) => {
-    const { taskId, userId } = req.body;
-    const assignment = await taskServices.assignUserToTask(taskId, userId);
-    res.status(201).json({ message: "User assigned to task successfully", assignment });
-});
-
-export const getUsersAssignedToTask = asyncHandler(async (req: Request, res: Response) => {
-    const { taskId } = req.params;
-    const users = await taskServices.getUsersAssignedToTask(taskId);
-    res.json({ message: "users Retrieved successfully", users});
-});
-
-export const getTasksAssignedToUser = asyncHandler(async (req: Request, res: Response) => {
-    const { tasks, source } = await taskServices.getTasksAssignedToUser(req);
-    res.json({message: "Tasks Retrieved successfully", source, tasks});
-});
-
-export const removeUserFromTask = asyncHandler(async (req: Request, res: Response) => {
-    const { taskId, userId } = req.body;
-    await taskServices.removeUserFromTask(taskId, userId);
-    res.json({ message: "User removed from task" });
-});
-

@@ -1,5 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 import UserTask from "./userTask";
+import TaskComment from "./taskComment";
+import TaskHistory from "./taskHistory";
+import Notification from "./notification";
 
 export interface ITask extends Document {
     title: string;
@@ -35,6 +38,9 @@ const TaskSchema = new Schema<ITask>(
 TaskSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const taskId = this._id;
     await UserTask.deleteMany({ taskId });
+    await TaskComment.deleteMany({ taskId });
+    await TaskHistory.deleteMany({ taskId });
+    await Notification.deleteMany({ taskId });
     next();
 });
 

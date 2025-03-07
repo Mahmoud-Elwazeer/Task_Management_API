@@ -2,7 +2,10 @@ import mongoose, { Schema, Document } from "mongoose";
 import validator from "validator";
 import { Types } from 'mongoose';
 import UserTask from "./userTask";
+import Notification from "./notification";
 import Task from "./task";
+import TaskComment from "./taskComment";
+import TaskHistory from "./taskHistory";
 
 export interface IUser extends Document {
     _id: Types.ObjectId;
@@ -59,7 +62,10 @@ UserSchema.set("toJSON", {
 UserSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const userId = this._id;
     await UserTask.deleteMany({ userId });
-    await Task.deleteMany({ createdBy: userId })
+    await Task.deleteMany({ createdBy: userId });
+    await TaskComment.deleteMany({ userId });
+    await TaskHistory.deleteMany({ userId });
+    await Notification.deleteMany({ userId })
     next();
 });
 

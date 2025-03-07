@@ -45,7 +45,15 @@ const getUserTasksSchema = z.object({
     limit: z.string().optional(),
 });
 
+const createCommentSchema = z.object({
+    taskId: z.string().length(24, "Task ID is required"),
+    comment: z.string().min(1, "Comment cannot be empty").max(500, "Comment is too long"),
+});
 
+const deleteCommentSchema = z.object({
+    taskId: z.string().length(24, "Invalid task ID format"),
+    commentId: z.string().length(24, "Invalid user ID format"),
+});
 
 export const createTaskValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
     const validatedData = createTaskSchema.parse(req.body);
@@ -80,3 +88,15 @@ export const assignTaskValidator = asyncHandler(async (req: any, res: Response, 
     req.validatedData = validatedData
     next();
 });
+
+export const createCommentValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
+    const validatedData = createCommentSchema.parse({ taskId: req.params.taskId, ...req.body});
+    req.validatedData = validatedData
+    next();
+});
+
+export const deleteCommentValidator = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
+    deleteCommentSchema.parse({ taskId: req.params.taskId, commentId: req.params.commentId});
+    next();
+});
+

@@ -8,6 +8,7 @@ const ExpireTime = process.env.ExpiryTimeForCache || '3600';
 const redisClient = new Redis({
     host: REDIS_HOST,
     port: parseInt(REDIS_PORT, 10),
+    maxRetriesPerRequest: null,
 });
 
 redisClient.on("error", (error) => {

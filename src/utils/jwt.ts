@@ -10,13 +10,10 @@ interface TokenPayload {
 }
 
 const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
-// const access_token_expriation = process.env.ACCESS_TOKEN_EXPIRATION;
-const access_token_expriation = '1h';
+const access_token_expriation = process.env.ACCESS_TOKEN_EXPIRATION;
 
 const refresh_token_secret = process.env.REFRESH_TOKEN_SECRET;
-// const refresh_token_expriation =  process.env.REFRESH_TOKEN_EXPIRATION;
-
-const refresh_token_expriation = '7d';
+const refresh_token_expriation =  process.env.REFRESH_TOKEN_EXPIRATION;
 
 export const generateAcessToken = (payload: TokenPayload) => {
     if (!access_token_secret || !access_token_expriation) {
