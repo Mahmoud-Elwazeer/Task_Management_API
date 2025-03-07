@@ -2,9 +2,16 @@ import * as taskServices from '../services/task'
 import { Request, Response, NextFunction} from 'express'
 import asyncHandler from 'express-async-handler'
 import notificationQueue from '../queues/notification';
+import publishMessage from '../services/eventPublisher';
 
 export const create = asyncHandler(async(req: Request, res: Response, next: NextFunction) => {
     const task = await taskServices.create(req);
+
+    await publishMessage("task.created", {
+        taskId: task._id,
+        title: task.title,
+        userId: task.createdBy,
+    });
 
     // Add notification job
     await notificationQueue.add("taskEvent", {
@@ -30,13 +37,21 @@ export const getAll = asyncHandler(async(req: Request, res: Response, next: Next
 export const update = asyncHandler(async(req: any, res: Response, next: NextFunction) => {
     const task = await taskServices.update(req);
 
-    if (task)
+    if (task) {
+        await publishMessage("task.updated", {
+            taskId: task._id,
+            changes: req.body,
+        });
+
         await notificationQueue.add("taskEvent", {
             type: "TASK_UPDATED",
             taskId: task._id,
             deletedBy: req.user._id,
             userId: task.createdBy,
         });
+
+    }
+        
 
     res.status(200).json({ message: 'Task updated successfully', task});
 });

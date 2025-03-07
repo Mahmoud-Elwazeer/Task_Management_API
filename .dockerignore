@@ -1,5 +1,6 @@
 node_modules/
 package-lock.json
 Dockerfile
+dist/
 docker-compose.yml
 .dockerignore

@@ -19,14 +19,14 @@ export const generateAcessToken = (payload: TokenPayload) => {
     if (!access_token_secret || !access_token_expriation) {
         throw new ApiError("Secret key or access_token_expriation is not defined", 500);
     }
-    return jwt.sign(payload, access_token_secret, { expiresIn: access_token_expriation });
+    return jwt.sign(payload, access_token_secret, { expiresIn: '1h' });
 }
 
 export const generateRefreshToken = (payload: TokenPayload) => {
     if (!refresh_token_secret || !refresh_token_expriation) {
         throw new ApiError("Secret key or refresh_token_expriation is not defined", 500);
     }
-    return jwt.sign(payload, refresh_token_secret, { expiresIn: refresh_token_expriation });
+    return jwt.sign(payload, refresh_token_secret, { expiresIn: '7d' });
 }
 
 export const verifyAcessToken = (token: string) => {
