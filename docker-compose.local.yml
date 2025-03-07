@@ -63,6 +63,9 @@ services:
     container_name: mongo
     volumes:
       - mongo-data:/data/db
+    profiles:
+      - development
+      - production
     networks:
       - app_network
 
@@ -85,6 +88,9 @@ services:
       - ./nginx/html:/usr/share/nginx/html
     environment:
       - DEFAULT_HOST=${DOMAIN:-localhost}  # Fallback to localhost if DOMAIN is not set
+    profiles:
+      - development
+      - production
     networks:
       - app_network
 
@@ -99,6 +105,9 @@ services:
       - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}  # Fallback email
     depends_on:
       - nginx-proxy
+    profiles:
+      - development
+      - production
     networks:
       - app_network
 
