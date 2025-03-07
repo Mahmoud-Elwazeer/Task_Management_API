@@ -5,7 +5,7 @@ import dbConnection from './config/db';
 import { handleRoutes } from './routes/index'
 import { globalError } from './middlewares/gloablError';
 import limiter from './middlewares/rateLimiter';
-import path from 'path';
+import logMiddleware from './middlewares/log';
 // import cors from 'cors';
 
 // env
@@ -22,14 +22,18 @@ dbConnection();
 app.use(helmet());
 app.disable("x-powered-by");
 
+
+// Trust the first proxy (Nginx)
+app.set('trust proxy', 1);
+
 // Receiving JSON Data
 app.use(express.json());
 
-// const baseUploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
-// app.use('/uploads/tasks/', express.static(path.join(baseUploadDir, 'images/tasks')));
-
 
 app.use(limiter);
+
+app.use(logMiddleware);
+
 // call routes
 handleRoutes(app);
 

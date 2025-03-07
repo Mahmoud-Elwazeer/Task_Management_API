@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  task-management-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ExpiryTimeForCache=${ExpiryTimeForCache}
+      - VIRTUAL_HOST=${DOMAIN:-localhost}
+      - VIRTUAL_PORT=${PORT}
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}
+    depends_on:
+      - redis
+    volumes:
+      - ./:/app
+    command: npm run dev
+    profiles:
+      - development
+    networks:
+      - app_network
+
+  task-management-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ExpiryTimeForCache=${ExpiryTimeForCache}
+      - VIRTUAL_HOST=${DOMAIN:-localhost}
+      - VIRTUAL_PORT=${PORT}
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}
+    depends_on:
+      - redis
+    volumes:
+      - ./:/app
+    command: sh -c "npm run build && pm2-runtime pm2.config.js"
+    profiles:
+      - production
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    networks:
+      - app_network
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/vhost.d:/etc/nginx/vhost.d
+      - ./nginx/html:/usr/share/nginx/html
+    environment:
+      - DEFAULT_HOST=${DOMAIN:-localhost}  # Fallback to localhost if DOMAIN is not set
+    networks:
+      - app_network
+
+  letsencrypt:
+    image: nginxproxy/acme-companion
+    container_name: letsencrypt
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./nginx/certs:/etc/nginx/certs:rw
+      - ./nginx/acme.sh:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}  # Fallback email
+    depends_on:
+      - nginx-proxy
+    networks:
+      - app_network
+
+networks:
+  app_network:
+
+volumes:
+  mongo-data:
