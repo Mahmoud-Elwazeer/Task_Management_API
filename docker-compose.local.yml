@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   task-management-local-dev:
     build:

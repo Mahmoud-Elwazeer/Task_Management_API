@@ -44,7 +44,7 @@ jobs:
           
           git pull
 
-          docker-compose down
+          docker-compose --profile production down
           docker-compose pull
           docker-compose --profile production build
           docker-compose --profile production up -d
