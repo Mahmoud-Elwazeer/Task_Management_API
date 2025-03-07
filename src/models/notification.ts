@@ -18,6 +18,8 @@ const NotificationSchema = new Schema<INotification>(
     { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+NotificationSchema.index({ userId: 1, isRead: 1 });
+
 const Notification = model<INotification>("Notification", NotificationSchema);
 
 export default Notification

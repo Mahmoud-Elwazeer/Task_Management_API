@@ -13,6 +13,10 @@ const userTaskSchema = new Schema<IUserTask>(
     { timestamps: true }
 );
 
+userTaskSchema.index({ userId: 1, taskId: 1 }, { unique: true }); // Prevent duplicate assignments
+userTaskSchema.index({ userId: 1 }); // Fetch all tasks assigned to a user
+userTaskSchema.index({ taskId: 1 }); // Fetch all users assigned to a task
+
 const UserTask = mongoose.model<IUserTask>('UserTask', userTaskSchema);
 
 export default UserTask;

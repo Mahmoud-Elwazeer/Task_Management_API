@@ -1,0 +1,616 @@
+{
+	"info": {
+		"_postman_id": "d9b690c9-e25a-4644-ad75-652ec8808891",
+		"name": "task_management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "33651104"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the JSON response",
+									"const jsonResponse = pm.response.json();",
+									"console.log(jsonResponse)",
+									"",
+									"// Check if the token exists in the response",
+									"if (jsonResponse.accessToken) {",
+									"    // Set the token in the environment variable",
+									"    pm.environment.set(\"authToken\", jsonResponse.accessToken);",
+									"",
+									"    console.log(\"Token saved: \", jsonResponse.accessToken);",
+									"} else {",
+									"    console.error(\"Token not found in the response\");",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"email\": \"user@gmail.com\",\n//     \"password\": \"User@123\"\n// }\n\n{\n    \"email\": \"admin@gmail.com\",\n    \"password\": \"User@123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "refresh token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the JSON response",
+									"const jsonResponse = pm.response.json();",
+									"console.log(jsonResponse)",
+									"",
+									"// Check if the token exists in the response",
+									"if (jsonResponse.accessToken) {",
+									"    // Set the token in the environment variable",
+									"    pm.environment.set(\"authToken\", jsonResponse.accessToken);",
+									"",
+									"    console.log(\"Token saved: \", jsonResponse.accessToken);",
+									"} else {",
+									"    console.error(\"Token not found in the response\");",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2M4ZTg1MmNmYTczYjQyZDUyYzQ5ZjkiLCJlbWFpbCI6InVzZXJAZ21haWwuY29tIiwicm9sZSI6IlVzZXIiLCJpYXQiOjE3NDEyMjU5NTksImV4cCI6MTc0MTIyOTU1OX0.Pfo36jK6cOH-92WM-pe5DB7ImpGr-ztErX3_Yknpq4Y\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/auth/token/refresh"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "create user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": ""
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mahmoud Elwazeer\",\n    \"email\": \"user1@gmail.com\",\n    \"password\": \"User@123\"\n    // \"role\": \"Admin\"\n    //  notes for create user with role Admin for firt time set NODE_ENV = dev and then use api to create one and after that change NODE_ENV = prod\n     //  Admin, Manager only available when NODE_ENV = dev otherwise update status using update user status with admin account (Only admin can update status)\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/users/sign-up"
+					},
+					"response": []
+				},
+				{
+					"name": "get current user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/users/me"
+					},
+					"response": []
+				},
+				{
+					"name": "get user by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/users/67c99c04722b4edb647ce781"
+					},
+					"response": []
+				},
+				{
+					"name": "get all users (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update user by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mahmoud Elwazeer\",        // optional\n    \"email\": \"test@gmail.com\"      // optional\n    // \"role\": \"Admin\" // for only admin \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/users/67c99c04722b4edb647ce781"
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/users/67ca1725c005ec2bfd2c89cf"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task",
+			"item": [
+				{
+					"name": "create task (Admin, Manager)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Task 1\",\n    \"description\": \"first Task\",\n    \"priority\": \"Medium\",  // optional Low, Medium, High , default value Low\n    \"dueDate\": \"03-15-2025\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "get task by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/tasks/67c9aeba612f135d9e0b1892"
+					},
+					"response": []
+				},
+				{
+					"name": "get all tasks (Only Admin & Manager)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "In Progress",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "Medium",
+									"disabled": true
+								},
+								{
+									"key": "dueDate",
+									"value": "03-25-2025",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update task by id (only Admin & Manager)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Task 2\", // optional\n    \"description\": \"second Task\", // optional\n    \"status\": \"In Progress\", // optional [\"Pending\", \"In Progress\", \"Completed\"]\n    \"priority\": \"Medium\" // optional     [\"Low\", \"Medium\", \"High\"]\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/tasks/67ca3a2fe70867aeec91112f"
+					},
+					"response": []
+				},
+				{
+					"name": "delete task (only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/tasks/67ca3796b4211170aa3c4002"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Task",
+			"item": [
+				{
+					"name": "assign task for user (Admin & Manager)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"taskId\": \"67cae465bf4fbb1ce7bf6ba3\",\n    \"userId\": \"67c8eca1bd2b27e87feae54b\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/tasks/assign"
+					},
+					"response": []
+				},
+				{
+					"name": "Get all tasks assigned to a user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tasks/user/67c9b4ffcde3dd5fda4252a7",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"user",
+								"67c9b4ffcde3dd5fda4252a7"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "In Progress",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "Medium",
+									"disabled": true
+								},
+								{
+									"key": "dueDate",
+									"value": "03-25-2025",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users assigned to a task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/tasks/67cae465bf4fbb1ce7bf6ba3/users"
+					},
+					"response": []
+				},
+				{
+					"name": "remove user from task (Admin & Manager)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"taskId\": \"67c9af28612f135d9e0b189b\",\n    \"userId\": \"67c8ed2abd2b27e87feae551\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/tasks/user/unassign"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task History",
+			"item": [
+				{
+					"name": "get task history",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/tasks/67ca3a2fe70867aeec91112f/history"
+					},
+					"response": []
+				},
+				{
+					"name": "get task interactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/tasks/67ca3a2fe70867aeec91112f/interactions"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task Comment",
+			"item": [
+				{
+					"name": "create comment on task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Comment on Task\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/tasks/67cae465bf4fbb1ce7bf6ba3/comments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get all comments for a task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/tasks/67cae465bf4fbb1ce7bf6ba3/comments"
+					},
+					"response": []
+				},
+				{
+					"name": "delete comment for a task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/tasks/67cae465bf4fbb1ce7bf6ba3/comments/67caeff1d6d7d30a03eaa5b1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "gt user notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "mark Notification As Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{authToken}}"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "{{base_url}}/notifications/67ca31ab2c2e94bb39a65a6b/read"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -39,7 +39,8 @@ const UserSchema = new Schema<IUser>(
         },
         role: { 
             type: String, 
-            enum: ["Admin", "Manager", "User"], 
+            enum: ["Admin", "Manager", "User"],
+            index: true, 
             default: "User" 
         },
         isVerified: { 

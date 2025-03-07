@@ -18,6 +18,10 @@ const TaskHistorySchema = new Schema<ITaskHistory>(
     { timestamps: { createdAt: "timestamp", updatedAt: false } }
 );
 
+TaskHistorySchema.index({ taskId: 1, createdAt: -1 });
+TaskHistorySchema.index({ userId: 1 });
+TaskHistorySchema.index({ action: 1 }); 
+
 const TaskHistory = model<ITaskHistory>("TaskHistory", TaskHistorySchema);
 
 export default TaskHistory;

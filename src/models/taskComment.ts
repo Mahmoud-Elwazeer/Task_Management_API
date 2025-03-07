@@ -16,6 +16,9 @@ const TaskCommentSchema = new Schema<ITaskComment>(
     { timestamps: { createdAt: "createdAt", updatedAt: false } }
 );
 
+TaskCommentSchema.index({ taskId: 1, createdAt: -1 });
+TaskCommentSchema.index({ userId: 1 }); 
+
 const TaskComment = model<ITaskComment>("TaskComment", TaskCommentSchema);
 
 export default TaskComment;

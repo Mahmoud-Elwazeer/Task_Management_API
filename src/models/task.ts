@@ -35,6 +35,11 @@ const TaskSchema = new Schema<ITask>(
     { timestamps: true }
 );
 
+TaskSchema.index({ createdBy: 1 });
+TaskSchema.index({ status: 1 });
+TaskSchema.index({ dueDate: 1 });
+TaskSchema.index({ priority: 1 });
+
 TaskSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const taskId = this._id;
     await UserTask.deleteMany({ taskId });
