@@ -159,6 +159,35 @@ You can run the application using Docker. There are two options depending on whe
 
 ---
 
+## **Cloud Deployment on AWS**
+
+The backend API is deployed on **AWS EC2** using **Docker**, **PM2**, and **NGINX**. Below is an explanation of the deployment process:
+
+### **1. AWS EC2 Instance Setup**
+
+- Launched an **Amazon EC2** instance with Ubuntu Server.
+- Configured security groups to allow inbound traffic for:
+    - **HTTP (Port 80)**
+    - **HTTPS (Port 443)**
+    - **SSH (Port 22)**
+
+### **2. Docker Setup**
+
+- Use commands that we have explained above:
+
+### **3. PM2 for Process Management**
+
+- Used PM2 to start the application inside the Docker container:
+
+### **4. NGINX as a Reverse Proxy**
+
+- Configured NGINX to route traffic from **Port 80 (HTTP)** and **Port 443 (HTTPS)** to the application running on **Port 3000**.
+
+### **5. SSL/TLS Configuration**
+
+- Used **Let's Encrypt** to obtain a free SSL certificate for the domain `zimozi.elwazeer.tech`.
+- Installed **Certbot** and configured NGINX to serve the application over HTTPS:
+
 ## **Security Enhancements**
 
 - **Decision:** Implemented security best practices to protect the API.
