@@ -3,7 +3,6 @@
 <div align="center">
   <h3 align="center">Task Management Api</h3>
   <p align="center">
-    A system for managing companies, departments, employees, and projects with a workflow for employee performance reviews.
     <br />
     <a href="https://github.com/Mahmoud-Elwazeer/Task_Management_API/issues">Report Bug</a>
     ·
