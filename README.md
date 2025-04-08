@@ -1,17 +1,5 @@
 # Task Management Api
 
-<div align="center">
-  <h3 align="center">Task Management Api</h3>
-  <p align="center">
-    <br />
-    <a href="https://github.com/Mahmoud-Elwazeer/Task_Management_API/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/Mahmoud-Elwazeer/Task_Management_API/issues">Request Feature</a>
-  </p>
-</div>
-
----
-
 ## Overview
 
 The **Task Management API** is a scalable, event-driven, and high-performance backend service built with TypeScript, Express.js, MongoDB, Redis, BullMQ, and RabbitMQ. It enables users to create, manage, and track tasks efficiently with role-based access control (RBAC), caching, background jobs, and event-driven architecture.
